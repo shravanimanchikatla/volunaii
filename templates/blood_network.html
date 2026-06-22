@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}BloodLink — Emergency Blood Network | VOLUNAI{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 2rem; margin-top: 2rem;">
+    <!-- Sidebar -->
+    <div class="glass-panel" style="width: 230px; padding: 1.5rem; height: fit-content; flex-shrink: 0;">
+        <h3 style="margin-top: 0; color: #f87171;">🩸 BloodLink</h3>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('organizer_dashboard') }}" style="color: var(--text-secondary); text-decoration: none;">📋 Dashboard</a></li>
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('organizer_view_tasks') }}" style="color: var(--text-secondary); text-decoration: none;">📁 View Tasks</a></li>
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('organizer_roster') }}" style="color: var(--text-secondary); text-decoration: none;">👥 Volunteer Roster</a></li>
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('blood_bp.blood_network') }}" style="color: #f87171; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 0.4rem;">🩸 Blood Network</a></li>
+            <li style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);"><a href="{{ url_for('profile') }}" style="color: var(--text-secondary); text-decoration: none;">👤 My Profile</a></li>
+            <li style="margin-top: 0.75rem;"><a href="{{ url_for('logout') }}" style="color: var(--text-secondary); text-decoration: none;">🚪 Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div style="flex: 1; min-width: 0;">
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 1rem 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500;">✅ {{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- EMERGENCY BLOOD REQUEST FORM -->
+        <div class="glass-panel" style="padding: 2rem; border-top: 4px solid #ef4444; margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.8rem;">🚨</span>
+                <h2 style="margin: 0; color: #f87171;">Emergency Blood Request</h2>
+            </div>
+            <p style="color: var(--text-secondary); margin: 0 0 1.5rem 0; font-size: 0.95rem;">Fill in the details below. Matching donors will be alerted instantly via real-time notification.</p>
+
+            <form method="POST" action="{{ url_for('blood_bp.submit_blood_request') }}">
+                <!-- Row 1: Patient & Blood Type -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">PATIENT NAME</label>
+                        <input type="text" name="patient_name" required placeholder="e.g. Ravi Kumar"
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; font-family: inherit; font-size: 0.95rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">BLOOD TYPE NEEDED</label>
+                        <select name="blood_group_needed" required
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; font-family: inherit; font-size: 0.95rem; appearance: none;">
+                            <option value="" disabled selected>Select blood type</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O- (Universal)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">UNITS REQUIRED</label>
+                        <input type="number" name="units_required" min="1" max="10" value="1" required
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; font-family: inherit; font-size: 0.95rem;">
+                    </div>
+                </div>
+
+                <!-- Row 2: Hospital & City -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">HOSPITAL NAME</label>
+                        <input type="text" name="hospital_name" required placeholder="e.g. Apollo Hospital, Jubilee Hills"
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; font-family: inherit; font-size: 0.95rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">CITY</label>
+                        <input type="text" name="city" placeholder="e.g. Hyderabad"
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; font-family: inherit; font-size: 0.95rem;">
+                    </div>
+                </div>
+
+                <!-- Row 3: Urgency -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.6rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">URGENCY LEVEL</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label style="flex: 1; cursor: pointer;">
+                            <input type="radio" name="urgency" value="4" checked style="display: none;" class="urgency-radio">
+                            <div class="urgency-btn" style="text-align: center; padding: 0.75rem; border-radius: 8px; border: 2px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.2); transition: all 0.2s; font-weight: 600; color: #60a5fa;">
+                                ⏰ Normal
+                            </div>
+                        </label>
+                        <label style="flex: 1; cursor: pointer;">
+                            <input type="radio" name="urgency" value="6" style="display: none;" class="urgency-radio">
+                            <div class="urgency-btn" style="text-align: center; padding: 0.75rem; border-radius: 8px; border: 2px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.2); transition: all 0.2s; font-weight: 600; color: #f59e0b;">
+                                ⚡ Urgent
+                            </div>
+                        </label>
+                        <label style="flex: 1; cursor: pointer;">
+                            <input type="radio" name="urgency" value="9" style="display: none;" class="urgency-radio">
+                            <div class="urgency-btn" style="text-align: center; padding: 0.75rem; border-radius: 8px; border: 2px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.2); transition: all 0.2s; font-weight: 600; color: #ef4444;">
+                                🚨 Critical
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn"
+                    style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; font-family: inherit; letter-spacing: 0.5px; transition: opacity 0.2s;">
+                    🩸 Broadcast Alert to All Eligible Donors
+                </button>
+            </form>
+        </div>
+
+        <!-- ACTIVE REQUESTS TABLE -->
+        <div class="glass-panel" style="padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0;">Active Blood Requests</h3>
+                <span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem;">{{ requests|length }} Total</span>
+            </div>
+
+            {% if requests %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for req in requests %}
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem 1.5rem; border-radius: 12px; display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: center;">
+                    <!-- Blood Type Badge -->
+                    <div style="background: #ef4444; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 800; font-size: 1.3rem; text-align: center; min-width: 60px;">
+                        {{ req.blood_type_needed }}
+                    </div>
+                    <!-- Details -->
+                    <div>
+                        <div style="font-weight: 600; font-size: 1rem;">{{ req.hospital_name }}</div>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">
+                            Patient: {{ req.patient_name }} &nbsp;|&nbsp;
+                            Units: {{ req.units_needed }} &nbsp;|&nbsp;
+                            {% if req.city %}📍 {{ req.city }} &nbsp;|&nbsp;{% endif %}
+                            🕐 {{ req.created_at.strftime('%d %b, %H:%M') }}
+                        </div>
+                    </div>
+                    <!-- Status & Urgency -->
+                    <div style="text-align: right;">
+                        {% if req.urgency_score >= 8 %}
+                            <span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">🚨 CRITICAL</span>
+                        {% elif req.urgency_score >= 5 %}
+                            <span style="background: rgba(245,158,11,0.2); color: #f59e0b; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">⚡ URGENT</span>
+                        {% else %}
+                            <span style="background: rgba(96,165,250,0.2); color: #60a5fa; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">⏰ NORMAL</span>
+                        {% endif %}
+                        <div style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.4rem;">{{ req.status }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🩸</div>
+                <p style="margin: 0;">No active blood requests. Use the form above to create one.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- DONOR INVENTORY -->
+        <div class="glass-panel" style="padding: 2rem; margin-top: 2rem;">
+            <h3 style="margin-top: 0;">Available Donors by Blood Type</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                {% set types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                {% for t in types %}
+                    {% set count = donors | selectattr('blood_group', 'equalto', t) | list | length %}
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; text-align: center; border: 1px solid {% if count > 0 %}rgba(239,68,68,0.3){% else %}rgba(255,255,255,0.08){% endif %};">
+                        <div style="font-weight: 800; font-size: 1.4rem; color: {% if count > 0 %}#f87171{% else %}var(--text-secondary){% endif %};">{{ t }}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">{{ count }} donor{{ 's' if count != 1 }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(96,165,250,0.08); border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+                💡 <strong style="color: var(--text-primary);">Compatibility Note:</strong> O- is the Universal Donor. AB+ is the Universal Recipient. Our system automatically alerts all compatible donors, not just exact matches.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    input[type="text"], input[type="number"], select {
+        outline: none;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
+    }
+    select option { background: #1a1a2e; color: white; }
+    .urgency-radio:checked + .urgency-btn {
+        border-color: currentColor;
+        background: rgba(255,255,255,0.08);
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+    }
+    #submit-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+</style>
+
+<script>
+    // Urgency button highlight on select
+    document.querySelectorAll('.urgency-radio').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('.urgency-btn').forEach(function(btn) {
+                btn.style.background = 'rgba(0,0,0,0.2)';
+                btn.style.borderColor = 'rgba(255,255,255,0.15)';
+            });
+            if (this.checked) {
+                this.nextElementSibling.style.background = 'rgba(255,255,255,0.08)';
+                this.nextElementSibling.style.borderColor = 'currentColor';
+            }
+        });
+    });
+
+    // Highlight first radio by default
+    document.querySelector('.urgency-radio:checked').dispatchEvent(new Event('change'));
+
+    // Confirm button feedback on submit
+    document.querySelector('form').addEventListener('submit', function() {
+        var btn = document.getElementById('submit-btn');
+        btn.textContent = '⏳ Broadcasting Alert...';
+        btn.disabled = true;
+    });
+</script>
+{% endblock %}

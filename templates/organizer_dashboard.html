@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; gap: 2rem; margin-top: 2rem;">
+    <!-- Sidebar -->
+    <div class="glass-panel" style="width: 250px; padding: 1.5rem; height: fit-content;">
+        <h3 style="margin-top: 0;">Organizer Panel</h3>
+        <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('organizer_dashboard') }}" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;">Submit New Report</a></li>
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('organizer_view_tasks') }}" style="color: var(--text-secondary); text-decoration: none;">View All Tasks</a></li>
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('organizer_roster') }}" style="color: var(--text-secondary); text-decoration: none;">Volunteer Roster</a></li>
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('blood_bp.blood_network') }}" style="color: #ef4444; text-decoration: none; font-weight: bold;">🩸 Blood Network</a></li>
+            <li style="margin-bottom: 1rem;"><a href="{{ url_for('raksha_bp.raksha_forensic_form') }}" style="color: #f59e0b; text-decoration: none; font-weight: bold;">🔍 RAAKSHA Missions</a></li>
+            <li style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);"><a href="{{ url_for('profile') }}" style="color: var(--text-secondary); text-decoration: none;">👤 My Profile</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div style="flex: 1;">
+        {% if briefing %}
+        <div class="glass-panel" style="padding: 2.5rem; margin-bottom: 2rem; border-left: 4px solid var(--accent-secondary); background: rgba(139, 92, 246, 0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; color: var(--accent-secondary);">✨ AI Situation Briefing</h2>
+                <a href="{{ url_for('organizer_dashboard') }}" style="color: var(--text-secondary); text-decoration: none;">Dismiss</a>
+            </div>
+            <div style="line-height: 1.6; font-size: 1.05rem;">
+                {{ briefing | replace('\n', '<br>') | safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if missions %}
+        <div class="glass-panel" style="padding: 2rem; margin-bottom: 2rem; border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.1);">
+            <h2 style="margin-top: 0; color: #f59e0b;">Active RAAKSHA Missions</h2>
+            <ul style="list-style: none; padding: 0;">
+                {% for mission in missions %}
+                <li style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <strong>{{ mission.name }}</strong> ({{ mission.age }} yrs) 
+                    - Last seen: {{ mission.location_last_seen }}
+                    <a href="{{ url_for('raksha_bp.view_case', case_id=mission.id) }}" style="float: right; color: #f59e0b; text-decoration: none;">View Details →</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        <div class="glass-panel" style="padding: 2.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 style="margin: 0;">Submit Field Data</h2>
+                <a href="{{ url_for('generate_briefing') }}" class="btn-primary btn-hover-effect" style="background: var(--accent-secondary); font-size: 0.9rem;">Generate AI Briefing</a>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Paste the raw text from your field survey or notes below. Our AI will automatically extract the core problem, location, required skills, and assign an urgency score.</p>
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div style="background: var(--success); color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('submit_report') }}" enctype="multipart/form-data">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Raw Field Notes</label>
+                    <textarea name="raw_text" rows="5" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; box-sizing: border-box; font-family: inherit;" placeholder="e.g. Visited the community center on 5th street. The roof is leaking heavily after the storm and they need someone with carpentry skills ASAP."></textarea>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; text-align: center; color: var(--text-secondary);">
+                    — OR —
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Voice Command / Upload Field Data</label>
+                    <div style="border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; padding: 2rem; text-align: center; background: rgba(0,0,0,0.1);">
+                        
+                        <!-- NEW MICROPHONE FEATURE -->
+                        <div style="margin-bottom: 1.5rem;">
+                            <button type="button" id="recordBtn" class="btn-primary" style="background: #ef4444; border: none; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 50px; cursor: pointer;">
+                                🎙️ Record Voice Task
+                            </button>
+                            <span id="recordingStatus" style="margin-left: 1rem; color: #ef4444; font-weight: bold; display: none;">Recording...</span>
+                            <audio id="audioPlayback" controls style="display: none; margin-top: 1rem; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; border-radius: 50px;"></audio>
+                            <p id="voiceSuccessMsg" style="display: none; color: #10b981; font-weight: bold; margin-top: 0.5rem;">✅ Voice task captured! Ready to Analyze & Create Task.</p>
+                        </div>
+                        
+                        <div id="fileUploadContainer">
+                            <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">— OR —</div>
+                            
+                            <input type="file" id="report_file" name="report_file" accept=".csv,.xlsx,.xls,.pdf,.txt,.wav,.mp3,.webm,.ogg" style="color: white; width: 100%;">
+                            <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0.75rem 0 0 0;">
+                                🎙️ <strong>Audio files are AI-analyzed:</strong> Speak your report and Gemini will transcribe and extract the problems into emergency tasks automatically!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+<script>
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+const recordBtn = document.getElementById('recordBtn');
+const recordingStatus = document.getElementById('recordingStatus');
+const audioPlayback = document.getElementById('audioPlayback');
+const fileInput = document.getElementById('report_file');
+
+recordBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = event => {
+                if (event.data.size > 0) audioChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                audioPlayback.src = audioUrl;
+                audioPlayback.style.display = 'block';
+                
+                // Create a File object and set it to the file input
+                const file = new File([audioBlob], "voice_report.webm", { type: 'audio/webm' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                // UI Polish: Hide the file upload input and show success message
+                document.getElementById('fileUploadContainer').style.display = 'none';
+                document.getElementById('voiceSuccessMsg').style.display = 'block';
+            };
+            
+            mediaRecorder.start();
+            isRecording = true;
+            recordBtn.style.background = '#b91c1c';
+            recordBtn.innerText = '🛑 Stop Recording';
+            recordingStatus.style.display = 'inline';
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            alert("Please allow microphone access to use this feature.");
+        }
+    } else {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            isRecording = false;
+            recordBtn.style.background = '#ef4444';
+            recordBtn.innerText = '🎙️ Record Voice Task';
+            recordingStatus.style.display = 'none';
+        }
+    }
+});
+</script>
+
+                <button type="submit" class="btn-primary" style="font-size: 1.1rem; width: 100%;">Analyze & Create Task(s)</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

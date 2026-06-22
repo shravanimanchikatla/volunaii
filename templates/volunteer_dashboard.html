@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container volunteer-hub-container" style="display: flex; flex-direction: column; gap: 2rem; padding: 2rem 0;">
+    <!-- Volunteer Profile & Stats -->
+    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+        <div class="glass-panel" style="padding: 2rem; display: flex; align-items: center; gap: 2rem; border-left: 6px solid var(--accent-primary);">
+            <div style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 2px solid var(--accent-primary);">👤</div>
+            <div style="flex: 1;">
+                <h1 style="margin: 0; font-size: 1.8rem;">{{ user.name }}</h1>
+                <div style="color: var(--text-secondary); margin-top: 0.3rem;">🚨 Emergency Responder | Rank: <span style="color: #60a5fa; font-weight: 700;">Hero Rescuer</span></div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Total Points</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #4ade80;">{{ user.points }}</div>
+            </div>
+        </div>
+        
+        <div class="glass-panel" style="padding: 1.5rem; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));">
+            <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: #a855f7;">🏆 ACHIEVEMENTS</h3>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <span title="Rapid Responder" style="font-size: 1.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">⚡</span>
+                <span title="Life Saver" style="font-size: 1.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">🛡️</span>
+                <span title="Community Guardian" style="font-size: 1.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">🏙️</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blood Emergency Alerts -->
+    {% if matched_blood %}
+    <div>
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="width: 12px; height: 12px; background: #f87171; border-radius: 50%; animation: pulse 1.5s infinite;"></div>
+            <h2 style="margin: 0; color: #f87171;">🩸 EMERGENCY BLOOD ALERTS</h2>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for req in matched_blood %}
+            <div class="glass-panel" style="padding: 1.5rem; border-top: 4px solid #f87171;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #f87171;">{{ req.blood_type_needed }}</div>
+                    <div style="color: #f87171; font-weight: bold;">{{ req.units_needed }} Units</div>
+                </div>
+                <h3 style="margin: 0 0 0.5rem 0;">{{ req.hospital_name }}</h3>
+                <p style="margin: 0 0 1.5rem 0; font-size: 0.85rem; color: var(--text-secondary);">📍 {{ req.city }}<br>Patient: {{ req.patient_name }}</p>
+                <form action="{{ url_for('blood_bp.update_blood_status', request_id=req.id) }}" method="POST">
+                    <input type="hidden" name="status" value="Donor Assigned">
+                    <button type="submit" class="btn-primary" style="width: 100%; background: #f87171; border: none;">ACCEPT DONATION</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Active Blood Donations (In-Progress) -->
+    {% if active_donations %}
+    <div>
+        <h2 style="margin-bottom: 1.5rem; color: #f59e0b;">🩸 MY ACTIVE BLOOD DONATIONS</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for req in active_donations %}
+            <div class="glass-panel" style="padding: 1.5rem; border-left: 6px solid #f59e0b;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #f87171;">{{ req.blood_type_needed }}</div>
+                    <span style="background: rgba(245,158,11,0.2); color: #f59e0b; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800;">{{ req.status }}</span>
+                </div>
+                <h3 style="margin: 0 0 0.3rem 0;">{{ req.hospital_name }}</h3>
+                <p style="margin: 0 0 1.5rem 0; font-size: 0.85rem; color: var(--text-secondary);">Patient: {{ req.patient_name }} | {{ req.city }}</p>
+                
+                <!-- Progressive action buttons based on current status -->
+                {% if req.status == 'Donor Assigned' %}
+                <form action="{{ url_for('blood_bp.blood_arrived', request_id=req.id) }}" method="POST">
+                    <button type="submit" style="width: 100%; padding: 0.75rem; background: #f59e0b; border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer;">📍 I HAVE ARRIVED</button>
+                </form>
+                {% elif req.status == 'Volunteer Arrived' %}
+                <form action="{{ url_for('blood_bp.blood_will_donate', request_id=req.id) }}" method="POST">
+                    <button type="submit" style="width: 100%; padding: 0.75rem; background: #8b5cf6; border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer;">💉 I WILL DONATE</button>
+                </form>
+                {% elif req.status == 'Donation In Progress' %}
+                <form action="{{ url_for('blood_bp.blood_donated', request_id=req.id) }}" method="POST">
+                    <button type="submit" style="width: 100%; padding: 0.75rem; background: #4ade80; border: none; border-radius: 8px; color: black; font-weight: 800; cursor: pointer;">✅ I HAVE DONATED</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Active Emergency Alerts (RAAKSHA) -->
+    <div>
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite;"></div>
+            <h2 style="margin: 0; color: #ef4444;">ACTIVE EMERGENCY ALERTS</h2>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for mission in active_missions %}
+            <div class="glass-panel mission-alert-card" style="padding: 0; overflow: hidden; border: 2px solid #ef4444;">
+                <div style="background: #ef4444; color: white; padding: 0.5rem 1rem; display: flex; justify-content: space-between; font-weight: 800; font-size: 0.8rem;">
+                    <span>CRITICAL MISSION</span>
+                    <span>MISSING: {{ mission.time_diff }}</span>
+                </div>
+                <div style="padding: 1.5rem; display: flex; gap: 1.5rem;">
+                    <div style="width: 100px; height: 100px; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2); flex-shrink: 0;">
+                        {% if mission.photo_url %}
+                        <img src="{{ mission.photo_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">👤</div>
+                        {% endif %}
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0; font-size: 1.2rem;">{{ mission.name }}</h3>
+                        <p style="margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                            📍 {{ mission.location_last_seen }}<br>
+                            <span style="color: #94a3b8; font-size: 0.8rem;">Gender: {{ mission.gender }}</span>
+                        </p>
+                        <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <a href="{{ url_for('raksha_bp.view_case', case_id=mission.id) }}" class="btn-secondary" style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.85rem; text-decoration: none; text-align: center; padding: 0.5rem; border-radius: 8px; box-sizing: border-box;">VIEW FULL DETAILS & PHOTOS</a>
+                            <form action="{{ url_for('raksha_bp.join_search', case_id=mission.id) }}" method="POST" style="width: 100%;">
+                                <button type="submit" class="btn-primary" style="width: 100%; background: #ef4444; border: none; font-size: 0.85rem; padding: 0.5rem; border-radius: 8px;">ACCEPT MISSION</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not active_missions %}
+            <div class="glass-panel" style="padding: 3rem; text-align: center; grid-column: 1 / -1; opacity: 0.5;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h3>All Clear! No active search missions in your area.</h3>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- My Active Search Missions (RAAKSHA) -->
+    {% if my_search_missions %}
+    <div>
+        <h2 style="margin-bottom: 1.5rem; color: #ef4444;">✅ MY ACTIVE SEARCH MISSIONS</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for mission in my_search_missions %}
+            <div class="glass-panel" style="padding: 1.5rem; border-left: 6px solid #ef4444; display: flex; gap: 1rem;">
+                <div style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2); flex-shrink: 0;">
+                    {% if mission.photo_url %}
+                    <img src="{{ mission.photo_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">👤</div>
+                    {% endif %}
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <h3 style="margin: 0; color: #ef4444;">{{ mission.name }}</h3>
+                        <span style="font-size: 0.7rem; background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 800;">ONGOING</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        📍 Last seen: {{ mission.location_last_seen }}<br>
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Gender: {{ mission.gender }}</span>
+                    </p>
+                    <a href="{{ url_for('raksha_bp.view_case', case_id=mission.id) }}" class="btn-primary" style="display: inline-block; text-align: center; width: 100%; background: #ef4444; border: none; font-size: 0.85rem; text-decoration: none; box-sizing: border-box;">VIEW MISSION DETAILS</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- General Situational Tasks (AI Extracted) -->
+    <div>
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; animation: pulse 1.5s infinite;"></div>
+            <h2 style="margin: 0; color: #3b82f6;">GENERAL RELIEF MISSIONS</h2>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for task in matched_tasks %}
+            <div class="glass-panel task-card" style="padding: 1.5rem; border-top: 4px solid #3b82f6; position: relative;">
+                <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">
+                    PRIORITY {{ task.urgency_score }}
+                </div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem;">{{ task.title }}</h3>
+                <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">{{ task.description }}</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">📍 {{ task.location }}</div>
+                    <div style="font-size: 0.8rem; color: #4ade80;">🛠️ Needed: {{ task.required_skills }}</div>
+                </div>
+
+                <form action="{{ url_for('accept_task', task_id=task.id) }}" method="POST">
+                    <button type="submit" class="btn-primary" style="width: 100%; background: #3b82f6; border: none; font-size: 0.85rem;">DEPLOY TO MISSION</button>
+                </form>
+            </div>
+            {% endfor %}
+
+            {% for task in other_tasks %}
+            <div class="glass-panel task-card" style="padding: 1.5rem; border-top: 4px solid #64748b; position: relative; opacity: 0.85;">
+                <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(100, 116, 139, 0.2); color: #94a3b8; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">
+                    PRIORITY {{ task.urgency_score }}
+                </div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: #cbd5e1;">{{ task.title }}</h3>
+                <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">{{ task.description }}</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">📍 {{ task.location }}</div>
+                    <div style="font-size: 0.8rem; color: #f87171;">⚠️ Needed: {{ task.required_skills }}</div>
+                </div>
+
+                <form action="{{ url_for('accept_task', task_id=task.id) }}" method="POST">
+                    <button type="submit" class="btn-primary" style="width: 100%; background: transparent; border: 1px solid #64748b; color: #cbd5e1; font-size: 0.85rem;">ACCEPT ANYWAY</button>
+                </form>
+            </div>
+            {% endfor %}
+
+            {% if not matched_tasks and not other_tasks %}
+            <div class="glass-panel" style="padding: 3rem; text-align: center; grid-column: 1 / -1; opacity: 0.5;">
+                <h3>No general missions available. Stand by for situational analysis.</h3>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- My Active Situational Tasks -->
+    {% if my_tasks %}
+    <div>
+        <h2 style="margin-bottom: 1.5rem; color: #4ade80;">✅ MY ACTIVE MISSIONS</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for task in my_tasks %}
+            <div class="glass-panel" style="padding: 1.5rem; border-left: 6px solid #4ade80;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">{{ task.title }}</h3>
+                    <span style="font-size: 0.7rem; background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 800;">ACTIVE</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">{{ task.description }}</p>
+                <div style="display: flex; gap: 1rem;">
+                    <form action="{{ url_for('complete_task', task_id=task.id) }}" method="POST" style="flex: 1;">
+                        <button type="submit" class="btn-primary" style="width: 100%; background: #4ade80; border: none; color: black; font-weight: 800; font-size: 0.8rem;">COMPLETED</button>
+                    </form>
+                    <form action="{{ url_for('release_task', task_id=task.id) }}" method="POST" style="flex: 1;">
+                        <button type="submit" class="btn-primary" style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-weight: 800; font-size: 0.8rem;">RELEASE TASK</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.5); opacity: 0.5; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .mission-alert-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .mission-alert-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
+    }
+</style>
+{% endblock %}

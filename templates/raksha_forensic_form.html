@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="forensic-form-container" style="max-width: 900px; margin: 2rem auto;">
+    <div class="glass-panel" style="padding: 3rem;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="margin: 0; font-size: 2.2rem; background: linear-gradient(135deg, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Report Missing Child</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Please provide as much forensic detail as possible. Every second counts.</p>
+        </div>
+
+        <!-- Progress Stepper -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 3rem; position: relative; padding: 0 1rem;">
+            <div style="position: absolute; top: 15px; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.1); z-index: 1;"></div>
+            <div id="step-line" style="position: absolute; top: 15px; left: 0; width: 20%; height: 2px; background: #3b82f6; z-index: 2; transition: width 0.3s ease;"></div>
+            
+            {% for i in range(1, 7) %}
+            <div class="step-circle" id="circle-{{ i }}" style="width: 32px; height: 32px; border-radius: 50%; background: #1e293b; border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; z-index: 3; color: rgba(255,255,255,0.3); transition: all 0.3s ease;">{{ i }}</div>
+            {% endfor %}
+        </div>
+
+        <form id="raksha-forensic-form" method="POST" action="{{ url_for('raksha_bp.raksha_forensic_form') }}" enctype="multipart/form-data">
+            
+            <!-- SECTION 1: CHILD INFORMATION -->
+            <div class="form-section active" id="section-1">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Section 1: Child Information</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="field-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="name" required placeholder="Enter full legal name">
+                    </div>
+                    <div class="field-group">
+                        <label>Nickname / AKA</label>
+                        <input type="text" name="nickname" placeholder="e.g. Chintu">
+                    </div>
+                    <div class="field-group">
+                        <label>Date of Birth *</label>
+                        <input type="date" name="dob" required id="dob-input">
+                    </div>
+                    <div class="field-group">
+                        <label>Gender *</label>
+                        <select name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-group" style="margin-top: 1.5rem;">
+                    <label>Distinctive Features (Scars, Birthmarks, Tattoos) *</label>
+                    <textarea name="distinctive_features" rows="3" required placeholder="Describe identifying marks..."></textarea>
+                </div>
+                <div class="field-group" style="margin-top: 1.5rem;">
+                    <label>Clothing When Last Seen *</label>
+                    <textarea name="clothing_last_seen" rows="2" required placeholder="Color of shirt, pants, footwear, etc."></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 2: DISAPPEARANCE DETAILS -->
+            <div class="form-section" id="section-2" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Section 2: Disappearance Details</h3>
+                <div class="field-group">
+                    <label>Last Seen Location *</label>
+                    <input type="text" name="location_last_seen" required placeholder="Full address or nearby landmark">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div class="field-group">
+                        <label>Date & Time Last Seen *</label>
+                        <input type="datetime-local" name="last_seen_time" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Was Child Alone? *</label>
+                        <select name="was_child_alone" required>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                    <input type="checkbox" name="cctv_available" id="cctv_check" style="width: auto;">
+                    <label for="cctv_check" style="margin: 0;">Is CCTV footage available in the area?</label>
+                </div>
+                <div class="field-group" style="margin-top: 1.5rem;">
+                    <label>Witness Information (if any)</label>
+                    <textarea name="witness_info" rows="2" placeholder="Names or descriptions of witnesses..."></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 3: PARENT/GUARDIAN INFORMATION -->
+            <div class="form-section" id="section-3" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Section 3: Parent / Guardian Information</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="field-group">
+                        <label>Guardian Name *</label>
+                        <input type="text" name="parent_name" required placeholder="Enter full name">
+                    </div>
+                    <div class="field-group">
+                        <label>Relationship *</label>
+                        <input type="text" name="parent_relationship" required placeholder="e.g. Mother, Father, Aunt">
+                    </div>
+                    <div class="field-group">
+                        <label>Primary Phone *</label>
+                        <input type="tel" name="parent_phone" required placeholder="Emergency contact number">
+                    </div>
+                    <div class="field-group">
+                        <label>Current Location</label>
+                        <input type="text" name="parent_location" placeholder="Where is the guardian now?">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: POLICE & LEGAL -->
+            <div class="form-section" id="section-4" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Section 4: Police & Legal Information</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="field-group">
+                        <label>FIR Number *</label>
+                        <input type="text" name="fir_number" required placeholder="Enter FIR ID">
+                    </div>
+                    <div class="field-group">
+                        <label>Police Station *</label>
+                        <input type="text" name="police_station" required placeholder="Name of station where FIR was filed">
+                    </div>
+                    <div class="field-group">
+                        <label>Investigating Officer</label>
+                        <input type="text" name="investigating_officer" placeholder="Name of officer">
+                    </div>
+                    <div class="field-group">
+                        <label>Officer Contact</label>
+                        <input type="tel" name="officer_contact" placeholder="Officer's phone number">
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border-left: 4px solid #ef4444; border-radius: 4px;">
+                    <p style="font-size: 0.85rem; color: #ef4444; margin: 0;"><strong>NOTICE:</strong> RAKSHA alerts cannot be broadcasted without a valid FIR verification. False reporting is a punishable offense.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 5: MEDIA UPLOADS -->
+            <div class="form-section" id="section-5" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Section 5: File Upload System</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="field-group">
+                        <label>Child Face Photo *</label>
+                        <div class="upload-box">
+                            <input type="file" name="child_photo" required accept="image/*">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">Primary identification photo</p>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label>Full Body Photo</label>
+                        <div class="upload-box">
+                            <input type="file" name="body_photo" accept="image/*">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">Helpful for clothing ID</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group" style="margin-top: 1.5rem;">
+                    <label>Family / Guardian Photo</label>
+                    <div class="upload-box">
+                        <input type="file" name="family_photo" accept="image/*">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: SPECIAL CONSIDERATIONS -->
+            <div class="form-section" id="section-6" style="display: none;">
+                <h3 style="color: #60a5fa; margin-bottom: 1.5rem;">Section 6: Special Considerations</h3>
+                <div class="field-group">
+                    <label>Medical Conditions / Medications</label>
+                    <textarea name="medical_conditions" rows="3" placeholder="Does the child require immediate medication?"></textarea>
+                </div>
+                <div class="field-group" style="margin-top: 1.5rem;">
+                    <label>Special Needs / Behavioral Notes</label>
+                    <textarea name="special_needs" rows="3" placeholder="e.g. Non-verbal, sensitive to loud noises, etc."></textarea>
+                </div>
+                <div class="field-group" style="margin-top: 1.5rem;">
+                    <label>General Mission Briefing</label>
+                    <textarea name="description" rows="4" placeholder="Any other information that could help volunteers..."></textarea>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div style="display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <button type="button" id="prev-btn" class="btn-secondary" style="display: none; padding: 1rem 2rem;">Previous Step</button>
+                <div style="display: flex; gap: 1rem; margin-left: auto;">
+                    <button type="submit" name="status" value="Draft" class="btn-secondary" style="padding: 1rem 1.5rem; background: rgba(255,255,255,0.05); color: #fff;">Save as Draft</button>
+                    <button type="button" id="next-btn" class="btn-primary" style="padding: 1rem 2.5rem; background: #3b82f6;">Next Step</button>
+                    <button type="submit" id="submit-btn" name="status" value="Active" class="btn-primary" style="display: none; padding: 1rem 3rem; background: #ef4444; border: none; font-weight: 800;">IMMEDIATE BROADCAST 🚀</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .field-group { margin-bottom: 0; }
+    .field-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .field-group input, .field-group textarea, .field-group select {
+        width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(15, 23, 42, 0.4); color: #fff; font-family: inherit; font-size: 1rem; box-sizing: border-box;
+    }
+    .field-group input:focus { border-color: #3b82f6; outline: none; }
+    .upload-box { border: 2px dashed rgba(255,255,255,0.1); border-radius: 8px; padding: 1.5rem; text-align: center; background: rgba(255,255,255,0.02); }
+    .step-circle.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+    .step-circle.completed { background: #10b981 !important; border-color: #10b981 !important; color: #fff !important; }
+</style>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 6;
+    const nextBtn = document.getElementById('next-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const stepLine = document.getElementById('step-line');
+
+    function updateStepper() {
+        for (let i = 1; i <= totalSteps; i++) {
+            const circle = document.getElementById('circle-' + i);
+            if (i < currentStep) circle.className = 'step-circle completed';
+            else if (i === currentStep) circle.className = 'step-circle active';
+            else circle.className = 'step-circle';
+        }
+        stepLine.style.width = ((currentStep - 1) / (totalSteps - 1) * 100) + '%';
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            document.getElementById('section-' + currentStep).style.display = 'none';
+            currentStep++;
+            document.getElementById('section-' + currentStep).style.display = 'block';
+            updateStepper();
+        }
+        
+        if (currentStep === totalSteps) {
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'block';
+        }
+        prevBtn.style.display = 'block';
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            document.getElementById('section-' + currentStep).style.display = 'none';
+            currentStep--;
+            document.getElementById('section-' + currentStep).style.display = 'block';
+            updateStepper();
+        }
+        
+        if (currentStep < totalSteps) {
+            nextBtn.style.display = 'block';
+            submitBtn.style.display = 'none';
+        }
+        if (currentStep === 1) prevBtn.style.display = 'none';
+    });
+
+    updateStepper();
+</script>
+{% endblock %}

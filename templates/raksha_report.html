@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 800px; margin: 2rem auto; padding: 2.5rem; border-radius: 20px;">
+    <div style="display: flex; align-items: center; margin-bottom: 2rem;">
+        <div style="font-size: 2.5rem; margin-right: 1.5rem;">🛡️</div>
+        <div>
+            <h1 style="margin: 0; font-size: 2rem; color: #fff;">RAKSHA - Forensic Report</h1>
+            <p style="margin: 0; color: var(--text-secondary);">Initialize a high-priority missing person coordination mission.</p>
+        </div>
+    </div>
+
+    <form action="{{ url_for('raksha_report') }}" method="POST" enctype="multipart/form-data">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Full Name</label>
+                <input type="text" name="name" required class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Age</label>
+                    <input type="number" name="age" class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Gender</label>
+                    <select name="gender" class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Last Seen Location</label>
+            <input type="text" name="location" required class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;" placeholder="e.g. Sector 7, Central Park East">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Mission Description / Briefing</label>
+            <textarea name="description" rows="3" class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;" placeholder="Details about the disappearance and search parameters..."></textarea>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 2rem;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--accent-primary);">Forensic & Police Details</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">FIR Number</label>
+                    <input type="text" name="fir_number" class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Police Station</label>
+                    <input type="text" name="police_station" class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                </div>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Distinctive Features / Medical Conditions</label>
+                <input type="text" name="features" class="glass-panel" style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;" placeholder="Scar on left arm, wearing red shirt, diabetic, etc.">
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.3); border-radius: 12px; text-align: center;">
+            <label style="display: block; margin-bottom: 1rem; font-weight: 600; color: #60a5fa;">Official Photo for Identification</label>
+            <input type="file" name="photo" accept="image/*" style="display: block; margin: 0 auto;">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 2.5rem; padding: 1.2rem; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 10px 30px -5px rgba(59, 130, 246, 0.5);">
+            🚀 BROADCAST EMERGENCY ALERT
+        </button>
+    </form>
+</div>
+{% endblock %}

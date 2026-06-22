@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 1200px; margin: 2rem auto;">
+    
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <span style="background: #ef4444; color: white; padding: 0.2rem 0.8rem; border-radius: 20px; font-weight: 800; font-size: 0.8rem;">PRIORITY {{ case.urgency_score }}</span>
+                <span style="color: #94a3b8; font-weight: 600;">STATUS: <span style="color: {% if case.status == 'Active' %}#ef4444{% else %}#10b981{% endif %};">{{ case.status }}</span></span>
+            </div>
+            <h1 style="margin: 0; font-size: 2.5rem; color: #fff;">{{ case.name }}</h1>
+            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 1.1rem;">📍 Last seen at {{ case.location_last_seen }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('raksha_bp.report_sighting', case_id=case.id) }}" class="btn-primary" style="background: #3b82f6; border: none; padding: 1rem 2rem; text-decoration: none; font-weight: 800; font-size: 1.1rem; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);">🚨 REPORT SIGHTING</a>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+        
+        <!-- Left Column: Photos -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Primary Photo -->
+            <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                <h3 style="margin: 0 0 1rem 0; color: #60a5fa; text-align: left;">Primary Photo</h3>
+                <div style="width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                    {% if case.photo_url %}
+                    <img src="{{ case.photo_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem;">👤</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Family Photo -->
+            <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                <h3 style="margin: 0 0 1rem 0; color: #60a5fa; text-align: left;">Guardian / Family Photo</h3>
+                <div style="width: 100%; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                    {% if case.family_photo_url %}
+                    <img src="{{ case.family_photo_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #475569;">👨‍👩‍👧</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Body Photo -->
+            {% if case.body_photo_url %}
+            <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                <h3 style="margin: 0 0 1rem 0; color: #60a5fa; text-align: left;">Full Body (Clothing Ref)</h3>
+                <div style="width: 100%; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                    <img src="{{ case.body_photo_url }}" style="width: 100%; height: auto; object-fit: cover;">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Details -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Forensic Details -->
+            <div class="glass-panel" style="padding: 2rem;">
+                <h2 style="margin: 0 0 1.5rem 0; color: #f87171; border-bottom: 1px solid rgba(248,113,113,0.3); padding-bottom: 0.5rem;">Forensic Profile</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div><span style="color: var(--text-secondary); font-size: 0.85rem;">AGE</span><br><strong style="font-size: 1.1rem;">{{ case.age or 'Unknown' }}</strong></div>
+                    <div><span style="color: var(--text-secondary); font-size: 0.85rem;">GENDER</span><br><strong style="font-size: 1.1rem;">{{ case.gender or 'Unknown' }}</strong></div>
+                    <div><span style="color: var(--text-secondary); font-size: 0.85rem;">DOB</span><br><strong style="font-size: 1.1rem;">{{ case.dob or 'Unknown' }}</strong></div>
+                    <div><span style="color: var(--text-secondary); font-size: 0.85rem;">NICKNAME</span><br><strong style="font-size: 1.1rem;">{{ case.nickname or 'None' }}</strong></div>
+                    <div style="grid-column: 1 / -1;"><span style="color: var(--text-secondary); font-size: 0.85rem;">DISTINCTIVE FEATURES</span><br><strong style="font-size: 1.1rem;">{{ case.distinctive_features or 'None noted' }}</strong></div>
+                    <div style="grid-column: 1 / -1;"><span style="color: var(--text-secondary); font-size: 0.85rem;">CLOTHING WHEN LAST SEEN</span><br><strong style="font-size: 1.1rem;">{{ case.clothing_last_seen or 'Unknown' }}</strong></div>
+                </div>
+            </div>
+
+            <!-- Guardian & Police Details -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="glass-panel" style="padding: 1.5rem; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <h3 style="margin: 0 0 1rem 0; color: #60a5fa;">Guardian Information</h3>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Name:</strong> {{ case.parent_name or 'N/A' }}</p>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Relation:</strong> {{ case.parent_relationship or 'N/A' }}</p>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Contact:</strong> <a href="tel:{{ case.parent_phone }}" style="color: #60a5fa;">{{ case.parent_phone or 'N/A' }}</a></p>
+                    <p style="margin: 0; font-size: 0.9rem;"><strong>Location:</strong> {{ case.parent_location or 'N/A' }}</p>
+                </div>
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <h3 style="margin: 0 0 1rem 0; color: #a855f7;">Police / FIR Details</h3>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>FIR ID:</strong> {{ case.fir_number or 'Not Verified' }}</p>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Station:</strong> {{ case.police_station or 'N/A' }}</p>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Officer:</strong> {{ case.investigating_officer or 'N/A' }}</p>
+                    <p style="margin: 0; font-size: 0.9rem;"><strong>Contact:</strong> {{ case.officer_contact or 'N/A' }}</p>
+                </div>
+            </div>
+
+            <!-- Disappearance details & Medical -->
+            <div class="glass-panel" style="padding: 2rem;">
+                <h3 style="margin: 0 0 1rem 0;">Disappearance Context</h3>
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.95rem;"><strong>Time Last Seen:</strong> {{ case.last_seen_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.95rem;"><strong>Was Child Alone?:</strong> {{ case.was_child_alone or 'Unknown' }}</p>
+                <p style="margin: 0 0 1rem 0; font-size: 0.95rem;"><strong>CCTV Available:</strong> {% if case.cctv_available %}<span style="color: #10b981;">Yes</span>{% else %}<span style="color: #ef4444;">No</span>{% endif %}</p>
+                
+                <h3 style="margin: 1.5rem 0 1rem 0; color: #f59e0b;">Medical & Special Needs</h3>
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.95rem;"><strong>Medical Conditions:</strong> {{ case.medical_conditions or 'None reported' }}</p>
+                <p style="margin: 0; font-size: 0.95rem;"><strong>Behavioral Notes:</strong> {{ case.special_needs or 'None' }}</p>
+            </div>
+
+            <!-- Sightings -->
+            <div class="glass-panel" style="padding: 2rem;">
+                <h2 style="margin: 0 0 1.5rem 0; color: #10b981; border-bottom: 1px solid rgba(16,185,129,0.3); padding-bottom: 0.5rem;">Reported Sightings</h2>
+                
+                {% if case.sighting_records %}
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% for s in case.sighting_records %}
+                    <div style="padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; position: relative; border-left: 4px solid {% if s.is_verified %}#10b981{% else %}#f59e0b{% endif %};">
+                        <div style="position: absolute; top: 1rem; right: 1rem;">
+                            {% if s.is_verified %}
+                            <span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">VERIFIED</span>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('raksha_bp.verify_sighting', sighting_id=s.id) }}" style="display:inline;">
+                                <button type="submit" class="btn-primary" style="background: transparent; border: 1px solid #f59e0b; color: #f59e0b; padding: 0.2rem 0.6rem; font-size: 0.7rem;">MARK VERIFIED</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <h4 style="margin: 0 0 0.5rem 0; color: #fff;">{{ s.location_name }}</h4>
+                        <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--text-secondary);">{{ s.description }}</p>
+                        <p style="margin: 0; font-size: 0.8rem; color: #94a3b8;">Reported on {{ s.reported_at.strftime('%b %d, %I:%M %p') }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; opacity: 0.5;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔭</div>
+                    <p>No sightings reported yet.</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

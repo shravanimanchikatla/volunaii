@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-panel" style="padding: 2rem; margin-top: 2rem;">
+    <h2>Report a Sighting</h2>
+    <form method="POST">
+        <div style="margin-bottom: 1rem;">
+            <label>Location Name:</label>
+            <input type="text" name="location_name" required style="width: 100%; padding: 0.5rem;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Description (What did you see?):</label>
+            <textarea name="description" required rows="4" style="width: 100%; padding: 0.5rem;"></textarea>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Child Condition (if applicable):</label>
+            <input type="text" name="child_condition" style="width: 100%; padding: 0.5rem;">
+        </div>
+        <button type="submit" class="btn-primary">Submit Report</button>
+        <a href="{{ url_for('raksha_bp.view_case', case_id=case_id) }}" style="margin-left: 1rem; color: white;">Cancel</a>
+    </form>
+</div>
+{% endblock %}
